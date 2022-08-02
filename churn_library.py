@@ -11,6 +11,7 @@
 # import libraries
 import os
 import logging
+from pathlib import Path
 import shap
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import plot_roc_curve, classification_report
@@ -18,8 +19,6 @@ from sklearn.metrics import plot_roc_curve, classification_report
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
-
-from pathlib import Path
 
 import pandas as pd
 import numpy as np
@@ -29,7 +28,7 @@ import joblib
 import seaborn as sns
 
 EDA_PATH = "images\eda"
-REPORTS_PATH = "images\results"
+REPORTS_PATH = "images\\results"
 
 os.environ['QT_QPA_PLATFORM']='offscreen'
 
@@ -70,12 +69,12 @@ def perform_eda(pd_df):
             None
     '''
 
-    fig = plt.figure(figsize=(20,10))
+    plt.figure(figsize=(20,10))
     pd_df['Churn'].hist()
     plt.savefig(Path(EDA_PATH, "churn_hist.png"))
 
 
-    fig1 = plt.figure(figsize=(20,10))
+    plt.figure(figsize=(20,10))
     pd_df['Customer_Age'].hist()
     plt.savefig(Path(EDA_PATH, "age_hist.png"))
 
@@ -198,8 +197,9 @@ def classification_report_image(y_train,
         plt.text(0.01, 0.7, str(classification_report(y_train, y_train_preds_rf)),
         {'fontsize': 10}, fontproperties = 'monospace') # approach improved by OP -> monospace!
         plt.axis('off')
-        plt.savefig('C:/Work/Courses/Machine Learning DevOps Engineer/Predict customer churn/'+
-        'images/results/rf_class_rpt.png')
+        plt.savefig(Path(REPORTS_PATH, "rf_class_rpt.png"))
+        # plt.savefig('C:/Work/Courses/Machine Learning DevOps Engineer/Predict customer churn/'+
+        # 'images/results/rf_class_rpt.png')
 
         plt.figure(figsize=(10, 10))
         plt.text(0.01, 1.25, str('Logistic Regression Train'), {'fontsize': 10},
@@ -211,8 +211,9 @@ def classification_report_image(y_train,
         plt.text(0.01, 0.7, str(classification_report(y_test, y_test_preds_lr)),
         {'fontsize': 10}, fontproperties = 'monospace') # approach improved by OP -> monospace!
         plt.axis('off')
-        plt.savefig('C:/Work/Courses/Machine Learning DevOps Engineer/Predict customer churn/'+
-        'images/results/lr_class_rpt.png')
+        plt.savefig(Path(REPORTS_PATH, "lr_class_rpt.png"))
+        # plt.savefig('C:/Work/Courses/Machine Learning DevOps Engineer/Predict customer churn/'+
+        # 'images/results/lr_class_rpt.png')
 
         logging.info("Reports save successfully as png at ./images/results")
 
@@ -252,7 +253,7 @@ def feature_importance_plot(model, x_data, output_pth):
 
         # Add feature names as x-axis labels
         plt.xticks(range(x_data.shape[1]), names, rotation=90)
-        plt.savefig(output_pth+'feature_importance.png')
+        plt.savefig(output_pth)
         print("RUnning save file at %s", output_pth+'feature_importance.png')
         logging.info("Saved importance feature at %s", output_pth+'feature_importance.png')
     except AssertionError:
@@ -277,7 +278,7 @@ def tree_explainer_plot(model, x_test, output_pth):
         explainer = shap.TreeExplainer(model.best_estimator_)
         shap_values = explainer.shap_values(x_test)
         shap.summary_plot(shap_values, x_test, plot_type="bar")
-        plt.savefig(output_pth+'tree_explainer.png')
+        plt.savefig(output_pth)
         print("Saving file at %s", output_pth+'tree_explainer.png')
         logging.info("Saved importance feature at %s", output_pth+'tree_explainer.png')
     except AssertionError:
@@ -320,35 +321,34 @@ def train_models(X_train, X_test, y_train, y_test):
     except Exception:
         logging.error("Models fitting failed")
 
-    # plot both RF and LR roc
-    plt.figure(figsize=(15, 8))
-    ax_fig = plt.gca()
-    plot_roc_curve(cv_rfc.best_estimator_, X_test, y_test, ax=ax_fig, alpha=0.8)
-    lrc_plot.plot(ax=ax_fig, alpha=0.8)
-    plt.show()
-    logging.info("Saving models roc plot")
-    plt.savefig('C:/Work/Courses/Machine Learning DevOps Engineer/Predict customer churn/'+
-    'images/results/roc_plot.png')
-    feature_importance_plot(cv_rfc, X,'C:/Work/Courses/Machine Learning DevOps Engineer/'+
-    'Predict customer churn/images/results/')
-    tree_explainer_plot(cv_rfc, X,'C:/Work/Courses/Machine Learning DevOps Engineer/'+
-    'Predict customer churn/images/results/')
-    # STORE MODEL SCORES
+    try:
+        # plot both RF and LR roc
+        plt.figure(figsize=(15, 8))
+        ax_fig = plt.gca()
+        plot_roc_curve(cv_rfc.best_estimator_, X_test, y_test, ax=ax_fig, alpha=0.8)
+        lrc_plot.plot(ax=ax_fig, alpha=0.8)
+        plt.show()
+        logging.info("Saving models roc plot")
+        plt.savefig(Path(REPORTS_PATH, "roc_plot.png"))
 
-    logging.info("Saving models scores")
-    savetxt('./logs/y_train_preds_lr.csv', lrc.predict(X_train), delimiter=',')
-    savetxt('./logs/y_train_preds_rf.csv', cv_rfc.best_estimator_.predict(X_train), delimiter=',')
-    savetxt('./logs/y_test_preds_lr.csv', lrc.predict(X_test), delimiter=',')
-    savetxt('./logs/y_test_preds_rf.csv', cv_rfc.best_estimator_.predict(X_test), delimiter=',')
-    ##
-    # classification_report_image(y_train, y_test)
-    # save best model
-    logging.info("Saving best model")
-    joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
-    joblib.dump(lrc, './models/logistic_model.pkl')
+        # plt.savefig('C:/Work/Courses/Machine Learning DevOps Engineer/Predict customer churn/'+
+        # 'images/results/roc_plot.png')
+        feature_importance_plot(cv_rfc, X, Path(REPORTS_PATH, "feature_importance.png"))
+        tree_explainer_plot(cv_rfc, X, Path(REPORTS_PATH, "tree_explainer.png"))
+        # STORE MODEL SCORES
 
+        logging.info("Saving models scores")
+        savetxt('./logs/y_train_preds_lr.csv', lrc.predict(X_train), delimiter=',')
+        savetxt('./logs/y_train_preds_rf.csv', cv_rfc.best_estimator_.predict(X_train),
+        delimiter=',')
+        savetxt('./logs/y_test_preds_lr.csv', lrc.predict(X_test), delimiter=',')
+        savetxt('./logs/y_test_preds_rf.csv', cv_rfc.best_estimator_.predict(X_test), delimiter=',')
+        ##
+        # classification_report_image(y_train, y_test)
+        # save best model
+        logging.info("Saving best model")
+        joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
+        joblib.dump(lrc, './models/logistic_model.pkl')
 
-def print_path():
-    from pathlib import Path
-    EDA_PATH = "images\eda"
-    print(Path(EDA_PATH, "age_hist.png"))
+    except Exception as g_ex:
+        logging.error("Error occured while saving a file{%s}", g_ex)

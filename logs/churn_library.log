@@ -1,1 +1,17 @@
 root - INFO - Reading file from path: ./data/bank_data.csv
+root - INFO - Created new column Attrition_Flag_Churn
+root - INFO - Created new column Gender_Churn
+root - INFO - Created new column Education_Level_Churn
+root - INFO - Created new column Marital_Status_Churn
+root - INFO - Created new column Income_Category_Churn
+root - INFO - Created new column Card_Category_Churn
+root - INFO - Splitting data 70% train 30% test
+root - INFO - Reports save successfully as png at ./images/results
+root - INFO - Reading file from path: ./data/bank_data.csv
+root - INFO - Created new column Attrition_Flag_Churn
+root - INFO - Created new column Gender_Churn
+root - INFO - Created new column Education_Level_Churn
+root - INFO - Created new column Marital_Status_Churn
+root - INFO - Created new column Income_Category_Churn
+root - INFO - Created new column Card_Category_Churn
+root - INFO - Splitting data 70% train 30% test
